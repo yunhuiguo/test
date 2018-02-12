@@ -57,7 +57,7 @@ vis_data = DataLoader(
 def imshow(img, title=None):
     """Imshow for Tensor."""
     npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)), interpolation='nearest')
+    plt.imshow(np.transpose(npimg), interpolation='nearest')
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
