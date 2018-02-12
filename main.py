@@ -47,6 +47,13 @@ test_data = DataLoader(
 
 use_gpu = torch.cuda.is_available()
 
+vis_data = DataLoader(
+    dataset = caltech256_train,
+    batch_size = 1,
+    shuffle = True,
+    num_workers = 4
+)
+
 def imshow(img, title=None):
     """Imshow for Tensor."""
     npimg = img.numpy()
@@ -57,8 +64,7 @@ def imshow(img, title=None):
     plt.savefig('foo.png')
 	
 # Get a batch of training data
-inputs, classes = next(iter(train_data))
-
+inputs, classes = next(iter(vis_data))
 
 # Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
