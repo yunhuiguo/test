@@ -50,7 +50,7 @@ use_gpu = torch.cuda.is_available()
 def imshow(img, title=None):
     """Imshow for Tensor."""
     npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.imshow(np.transpose(npimg, (1, 2, 0)), interpolation='nearest')
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
@@ -76,7 +76,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         print('-' * 10)
 
         # Each epoch has a training and validation phase
-        for phase in ['train', 'test']:
+        for phase in ['train']:
             if phase == 'train':
                 scheduler.step()
                 model.train(True)  # Set model to training mode
