@@ -162,7 +162,7 @@ vis_data = DataLoader(
 def imshow(img,name):
     """Imshow for Tensor."""
     npimg = img.numpy()
-    plt.imshow(npimg, interpolation='nearest')
+    plt.imshow(np.transpose(npimg), interpolation='nearest')
     plt.pause(0.001)  # pause a bit so that plots are updated
     plt.savefig(name)
 	
@@ -170,10 +170,8 @@ def imshow(img,name):
 vis_inputs, vis_classes = next(iter(vis_data))
 # Make a grid from batch
 out = torchvision.utils.make_grid(vis_inputs)
-out = out.numpy()
-out = np.transpose(out)
-
-#imshow(out, 'foo.png')
+print(out)
+imshow(out, 'foo.png')
 model_ft = model_ft.features
 model_ft.eval()
 x = Variable(vis_inputs)
