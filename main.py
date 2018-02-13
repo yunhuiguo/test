@@ -76,7 +76,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             for data in train_data:
                 # get the inputs
                 inputs, labels = data
-		count += 1
+		count += labels.size(0)
                 # wrap them in Variable
                 if use_gpu:
                     inputs = Variable(inputs.cuda())
@@ -95,8 +95,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 		optimizer.step()
 
 	    print('Loss of the network on the train data: %.3f' % (
-    	          running_loss / count))	
-	
+    	          running_loss))	
+
 	    model.eval()	
 	    correct = 0
 	    total = 0
@@ -114,16 +114,25 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
 	    correct = 0
 	    total = 0
+	    loss_ = 0.0
 	    for data in test_data:
+                  
     	        images, labels = data
+                labels = labels.long().cuda()
    	        outputs = model(Variable(images.cuda()))
 		labels = labels - 1
+
+                loss = criterion(outputs, Variable(labels).squeeze(1))
+		loss_ += loss.data[0]
+
    	        _, predicted = torch.max(outputs.data, 1)
    	        total += labels.size(0)
-    	        correct += (predicted == labels.long().cuda()).sum()
+    	        correct += (predicted == labels).sum()
 
 	    print('Accuracy of the network on the test data: %d %%' % (
     	         100 * correct / total))	
+	    print('Loss of the network on the test data: %.3f' % (
+    	          loss_))	
     return model
 
 # Finetune
@@ -146,9 +155,7 @@ optimizer_ft = optim.SGD(model_ft.classifier._modules['6'].parameters(), lr=0.00
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=1)
-
-
+                       num_epochs=20)
 
 vis_data = DataLoader(
     dataset = caltech256_train,
@@ -168,7 +175,6 @@ def imshow(img,name):
 vis_inputs, vis_classes = next(iter(vis_data))
 # Make a grid from batch
 out = torchvision.utils.make_grid(vis_inputs)
-print(out)
 imshow(out, 'foo.png')
 model_ft = model_ft.features
 model_ft.eval()
