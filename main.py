@@ -15,6 +15,8 @@ import os
 import copy
 from Caltech256 import Caltech256
 
+
+
 from torchvision import transforms #add this line in the above snippet
 from torch.utils.data import DataLoader #add this line in the above snippet
 matplotlib.use('Agg')
@@ -46,30 +48,6 @@ test_data = DataLoader(
 )
 
 use_gpu = torch.cuda.is_available()
-
-vis_data = DataLoader(
-    dataset = caltech256_train,
-    batch_size = 1,
-    shuffle = True,
-    num_workers = 4
-)
-
-def imshow(img, title=None):
-    """Imshow for Tensor."""
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg), interpolation='nearest')
-    if title is not None:
-        plt.title(title)
-    plt.pause(0.001)  # pause a bit so that plots are updated
-    plt.savefig('foo.png')
-	
-# Get a batch of training data
-inputs, classes = next(iter(vis_data))
-
-# Make a grid from batch
-out = torchvision.utils.make_grid(inputs)
-
-imshow(out)
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -123,8 +101,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 	    print('Loss of the network on the train data: %.3f' % (
     	          running_loss / count))	
 	
-	
-	    model.train(False)	
+	    model.eval()	
 	    correct = 0
 	    total = 0
 	    for data in train_data:
@@ -173,5 +150,47 @@ optimizer_ft = optim.SGD(model_ft.classifier._modules['6'].parameters(), lr=0.00
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25)
+                       num_epochs=0)
 
+vis_data = DataLoader(
+    dataset = caltech256_train,
+    batch_size = 1,
+    shuffle = True,
+    num_workers = 4
+)
+
+def imshow(img,name):
+    """Imshow for Tensor."""
+    npimg = img.numpy()
+    plt.imshow(npimg, interpolation='nearest')
+    plt.pause(0.001)  # pause a bit so that plots are updated
+    plt.savefig(name)
+	
+# Get a batch of training data
+vis_inputs, vis_classes = next(iter(vis_data))
+# Make a grid from batch
+out = torchvision.utils.make_grid(vis_inputs)
+out = out.numpy()
+out = np.transpose(out)
+
+#imshow(out, 'foo.png')
+model_ft = model_ft.features
+model_ft.eval()
+x = Variable(vis_inputs)
+'''
+outputs = model_ft(x)	
+
+out = torchvision.utils.make_grid(mo.parameters())
+imshow(out, 'conv1.png')
+'''
+
+for index, layer in enumerate(model_ft):
+	x = layer(x)
+	if index == 1:
+		out = torchvision.utils.make_grid(x.data[0])
+		print(out[0])
+		imshow(out[0], 'conv1.png')
+	elif index == 29:
+		out = torchvision.utils.make_grid(x.data[0])
+		imshow(out[0], 'conv2.png')
+	
