@@ -48,10 +48,11 @@ test_data = DataLoader(
 )
 
 use_gpu = torch.cuda.is_available()
+print(use_gpu)
+
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
-
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
@@ -84,19 +85,14 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                     inputs, labels = Variable(inputs), Variable(labels.long())
 		
 		labels = labels - 1		
-
-                # zero the parameter gradients
                 optimizer.zero_grad()
                 # forward
                 outputs = model(inputs)
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels.squeeze(1))
 		running_loss += loss.data[0]
-
-                # backward + optimize only if in training phase
-                if phase == 'train':
-                    loss.backward()
-		    optimizer.step()
+                loss.backward()
+		optimizer.step()
 
 	    print('Loss of the network on the train data: %.3f' % (
     	          running_loss / count))	
@@ -150,7 +146,9 @@ optimizer_ft = optim.SGD(model_ft.classifier._modules['6'].parameters(), lr=0.00
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=0)
+                       num_epochs=1)
+
+
 
 vis_data = DataLoader(
     dataset = caltech256_train,
@@ -161,7 +159,7 @@ vis_data = DataLoader(
 
 def imshow(img,name):
     """Imshow for Tensor."""
-    npimg = img.numpy()
+    npimg = img.cpu().numpy()
     plt.imshow(np.transpose(npimg), interpolation='nearest')
     plt.pause(0.001)  # pause a bit so that plots are updated
     plt.savefig(name)
@@ -174,7 +172,7 @@ print(out)
 imshow(out, 'foo.png')
 model_ft = model_ft.features
 model_ft.eval()
-x = Variable(vis_inputs)
+x = Variable(vis_inputs.cuda())
 '''
 outputs = model_ft(x)	
 
