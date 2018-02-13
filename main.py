@@ -97,6 +97,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             for data in train_data:
                 # get the inputs
                 inputs, labels = data
+		count += 1
                 # wrap them in Variable
                 if use_gpu:
                     inputs = Variable(inputs.cuda())
@@ -112,11 +113,16 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 outputs = model(inputs)
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels.squeeze(1))
+		running_loss += loss.data[0]
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
                     loss.backward()
 		    optimizer.step()
+
+	    print('Loss of the network on the train data: %.3f' % (
+    	          running_loss / count))	
+	
 	
 	    model.train(False)	
 	    correct = 0
@@ -125,6 +131,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     	        images, labels = data
    	        outputs = model(Variable(images.cuda()))
 		labels = labels - 1
+
    	        _, predicted = torch.max(outputs.data, 1)
    	        total += labels.size(0)
     	        correct += (predicted == labels.long().cuda()).sum()
